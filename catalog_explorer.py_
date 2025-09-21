@@ -1,0 +1,118 @@
+# catalog_explorer.py (Upgraded with CSV Export)
+
+import csv
+import time
+from printify_client import get_request
+
+def export_all_blueprints_to_csv():
+    """
+    Fetches all available blueprints and saves them to a CSV file.
+    """
+    print("\nFetching all available products from the Printify catalog...")
+    endpoint = "/catalog/blueprints.json"
+    blueprints = get_request(endpoint)
+    
+    if not blueprints:
+        print("❌ Could not retrieve catalog blueprints.")
+        return
+
+    file_name = "printify_blueprints.csv"
+    with open(file_name, mode='w', newline='', encoding='utf-8') as csvfile:
+        fieldnames = ['id', 'title']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        
+        writer.writeheader()
+        for blueprint in blueprints:
+            writer.writerow({'id': blueprint['id'], 'title': blueprint['title']})
+            
+    print(f"✅ Success! Exported {len(blueprints)} blueprints to '{file_name}'.")
+
+def export_blueprint_details_to_csv(blueprint_id):
+    """
+    Fetches all details for a specific blueprint, including every variant from
+    every provider, and saves them to a comprehensive CSV file.
+    """
+    print(f"\nFetching details for Blueprint ID: {blueprint_id}...")
+    
+    # 1. Get basic blueprint info
+    blueprint_endpoint = f"/catalog/blueprints/{blueprint_id}.json"
+    details = get_request(blueprint_endpoint)
+    
+    if not details:
+        print(f"❌ Could not find details for Blueprint ID: {blueprint_id}.")
+        return
+
+    blueprint_title = details['title']
+    file_name = f"blueprint_{blueprint_id}_{blueprint_title.replace(' ', '_')}_details.csv"
+    print(f"   - Preparing to export data to '{file_name}'...")
+
+    # 2. Prepare the CSV file
+    with open(file_name, mode='w', newline='', encoding='utf-8') as csvfile:
+        fieldnames = [
+            'blueprint_id', 'blueprint_title', 'print_provider_id', 
+            'print_provider_title', 'variant_id', 'variant_title', 
+            'variant_size', 'variant_color'
+        ]
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        
+        total_variants = 0
+        # 3. Loop through EACH print provider for this blueprint
+        for provider in details['print_providers']:
+            provider_id = provider['id']
+            provider_title = provider['title']
+            print(f"   - Fetching variants from provider: '{provider_title}' (ID: {provider_id})")
+            
+            variants_endpoint = f"/catalog/blueprints/{blueprint_id}/print_providers/{provider_id}/variants.json"
+            variant_data = get_request(variants_endpoint)
+            
+            if variant_data and 'variants' in variant_data:
+                # 4. Loop through EACH variant from that provider
+                for variant in variant_data['variants']:
+                    writer.writerow({
+                        'blueprint_id': blueprint_id,
+                        'blueprint_title': blueprint_title,
+                        'print_provider_id': provider_id,
+                        'print_provider_title': provider_title,
+                        'variant_id': variant['id'],
+                        'variant_title': variant['title'],
+                        'variant_size': variant['options'].get('size', 'One Size'),
+                        'variant_color': variant['options'].get('color', 'N/A')
+                    })
+                    total_variants += 1
+            
+            # Be respectful of the API by adding a small delay
+            time.sleep(0.5)
+
+    print(f"✅ Success! Exported {total_variants} total variants to '{file_name}'.")
+
+def run_explorer():
+    """
+    Provides a command-line menu to interact with the catalog.
+    """
+    print("🤖 Welcome to the Printify Catalog Explorer Agent!")
+    
+    while True:
+        print("\nWhat would you like to do?")
+        print("  1. List all available products (export to CSV)")
+        print("  2. Get all variants for a specific product (export to CSV)")
+        print("  3. Exit")
+        
+        choice = input("Enter your choice (1, 2, or 3): ")
+        
+        if choice == '1':
+            export_all_blueprints_to_csv()
+        elif choice == '2':
+            try:
+                b_id = input("Enter the Blueprint ID you want to inspect: ")
+                export_blueprint_details_to_csv(int(b_id))
+            except ValueError:
+                print("🚨 Invalid ID. Please enter a number.")
+        elif choice == '3':
+            print("Exiting explorer. Goodbye!")
+            break
+        else:
+            print("🚨 Invalid choice. Please enter 1, 2, or 3.")
+
+if __name__ == "__main__":
+    run_explorer()

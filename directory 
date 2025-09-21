@@ -1,0 +1,33 @@
+/local_amazon_agent/
+
+|-- main.py
+
+|-- /ui/
+
+| |-- _init_.py
+
+EXIST (can be empty)
+
+|-- main_window.py
+
+-->
+
+MUST
+
+||--
+
+/pages/
+
+|-- __init_.py
+
+<-- MUST
+
+EXIST (can be empty)
+
+|-- dashboard_page.py
+
+| | |-- (and all other page
+
+files)
+
+|-- (other files...)

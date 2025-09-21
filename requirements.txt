@@ -1,1 +1,6 @@
-streamlit
+Flask
+requests
+python-dotenv
+gspread
+oauth2client
+sendgrid
