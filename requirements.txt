@@ -4,3 +4,4 @@ python-dotenv
 gspread
 oauth2client
 sendgrid
+streamlit
