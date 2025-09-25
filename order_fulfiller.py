@@ -1,12 +1,10 @@
-# order_fulfiller.py
+# agents/order_fulfiller.py
 
 import time
 from api_clients import PrintifyApiClient
 
 def run_order_fulfiller():
-    """
-    Finds all 'on-hold' orders and sends them to production.
-    """
+    """Finds all 'on-hold' orders and sends them to production."""
     print("🤖 Order Fulfillment Agent: Initializing...")
     client = PrintifyApiClient()
 
@@ -22,13 +20,11 @@ def run_order_fulfiller():
 
     for order in on_hold_orders:
         order_id = order['id']
-        created_at = order['created_at']
-        print(f"\n   -> Fulfilling Order ID: {order_id} (Created: {created_at})")
+        print(f"\n   -> Fulfilling Order ID: {order_id}")
         
-        response = client.send_to_production(order_id)
+        response = client.send_order_to_production(order_id)
         if response:
             print(f"      ✅ Success! Order {order_id} sent to production.")
         else:
             print(f"      ❌ Failed to send order {order_id} to production.")
-        
-        time.sleep(1) # Rate limit between actions
+        time.sleep(1)
