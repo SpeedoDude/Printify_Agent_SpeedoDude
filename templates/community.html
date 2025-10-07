@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Community Hub{% endblock %}
+
+{% block content %}
+<h1>Community Hub</h1>
+
+<ul class="nav nav-tabs" id="communityTabs" role="tablist">
+    <li class="nav-item">
+        <a class="nav-link active" id="contests-tab" data-toggle="tab" href="#contests" role="tab">Contests</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="referrals-tab" data-toggle="tab" href="#referrals" role="tab">Referral Program</a>
+    </li>
+</ul>
+
+<div class="tab-content" id="communityTabContent">
+    <div class="tab-pane fade show active" id="contests" role="tabpanel">
+        <h2 class="mt-3">Contests</h2>
+        {% for contest_id, contest in contests.items() %}
+        <div class="card mt-3">
+            <div class="card-body">
+                <h5 class="card-title">{{ contest.name }}</h5>
+                <p class="card-text">{{ contest.description }}</p>
+                <p class="card-text"><small class="text-muted">Ends on {{ contest.end_date }}</small></p>
+                <form method="POST" action="/contests/{{ contest_id }}/enter">
+                    <button type="submit" class="btn btn-primary">Enter Contest</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="tab-pane fade" id="referrals" role="tabpanel">
+        <h2 class="mt-3">Referral Program</h2>
+        <p>Refer a friend and get a bonus!</p>
+        <p>Your referral code is: <strong>{{ session['username'] }}</strong></p>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+{% endblock %}

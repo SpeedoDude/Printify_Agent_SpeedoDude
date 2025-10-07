@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Catalog Explorer{% endblock %}
+
+{% block content %}
+<h1>Catalog Explorer</h1>
+<p>Browse Printify's product blueprints and print providers.</p>
+
+<ul class="nav nav-tabs" id="catalogTabs" role="tablist">
+    <li class="nav-item">
+        <a class="nav-link active" id="blueprints-tab" data-toggle="tab" href="#blueprints" role="tab">Blueprints</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="providers-tab" data-toggle="tab" href="#providers" role="tab">Print Providers</a>
+    </li>
+</ul>
+
+<div class="tab-content" id="catalogTabContent">
+    <div class="tab-pane fade show active" id="blueprints" role="tabpanel">
+        <div class="table-responsive mt-3">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Brand</th>
+                    </tr>
+                </thead>
+                <tbody id="blueprintsTable">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="tab-pane fade" id="providers" role="tabpanel">
+        <div class="table-responsive mt-3">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                    </tr>
+                </thead>
+                <tbody id="providersTable">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    $(document).ready(function() {
+        fetch("/api/catalog/blueprints")
+            .then(response => response.json())
+            .then(data => {
+                const blueprintsTable = document.getElementById("blueprintsTable");
+                data.forEach(blueprint => {
+                    const row = `<tr>
+                        <td>${blueprint.id}</td>
+                        <td>${blueprint.title}</td>
+                        <td>${blueprint.brand}</td>
+                    </tr>`;
+                    blueprintsTable.innerHTML += row;
+                });
+            });
+
+        fetch("/api/catalog/print-providers")
+            .then(response => response.json())
+            .then(data => {
+                const providersTable = document.getElementById("providersTable");
+                data.forEach(provider => {
+                    const row = `<tr>
+                        <td>${provider.id}</td>
+                        <td>${provider.title}</td>
+                    </tr>`;
+                    providersTable.innerHTML += row;
+                });
+            });
+    });
+</script>
+{% endblock %}

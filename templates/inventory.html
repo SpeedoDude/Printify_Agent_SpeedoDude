@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Inventory Sync{% endblock %}
+
+{% block content %}
+<h1>Inventory Sync</h1>
+<p>This page shows products that are currently out of stock.</p>
+<button id="checkStock" class="btn btn-primary">Check for Out-of-Stock Products</button>
+
+<div id="results" class="mt-4" style="display: none;">
+    <h2>Out-of-Stock Products</h2>
+    <ul id="productList" class="list-group"></ul>
+</div>
+
+<script>
+document.getElementById("checkStock").addEventListener("click", () => {
+    fetch("/api/inventory/oos")
+    .then(response => response.json())
+    .then(data => {
+        const productList = document.getElementById("productList");
+        productList.innerHTML = "";
+        if (data.length === 0) {
+            const li = document.createElement("li");
+            li.className = "list-group-item list-group-item-success";
+            li.textContent = "All products are in stock.";
+            productList.appendChild(li);
+        } else {
+            data.forEach(product => {
+                const li = document.createElement("li");
+                li.className = "list-group-item list-group-item-danger";
+                li.textContent = `${product.title} (ID: ${product.id})`;
+                productList.appendChild(li);
+            });
+        }
+        document.getElementById("results").style.display = "block";
+    });
+});
+</script>
+{% endblock %}

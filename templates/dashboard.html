@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h1 class="mt-5">Dashboard</h1>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <h2>Recent Orders</h2>
+        <ul class="list-group">
+            {% for order in orders %}
+            <li class="list-group-item">
+                <strong>Order #{{ order.id }}</strong> - {{ order.status }}
+            </li>
+            {% endfor %}
+        </ul>
+        <h2 class="mt-4">Failed Jobs</h2>
+        <div class="alert alert-warning" role="alert">
+            You have <strong>{{ failed_jobs }}</strong> failed jobs.
+        </div>
+    </div>
+    <div class="col-md-4">
+        <h2>Personalized Recommendations</h2>
+        <div class="card">
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    {% for recommendation in recommendations %}
+                    <li><i class="fas fa-lightbulb"></i> {{ recommendation }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

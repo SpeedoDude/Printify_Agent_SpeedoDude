@@ -4,4 +4,5 @@ python-dotenv
 gspread
 oauth2client
 sendgrid
-streamlit
+firebase-admin
+google-cloud-bigquery

@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Design Studio{% endblock %}
+
+{% block content %}
+<h1>Design Studio</h1>
+<p>Create your own unique designs and mint them as NFTs.</p>
+
+<div class="row">
+    <div class="col-md-8">
+        <canvas id="design-canvas" width="500" height="500" style="border: 1px solid black;"></canvas>
+    </div>
+    <div class="col-md-4">
+        <!-- Tab Navigation -->
+        <ul class="nav nav-tabs" id="ai-tabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="civitai-tab" data-toggle="tab" href="#civitai" role="tab">Advanced AI (Civitai)</a>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="ai-tabs-content">
+            <!-- Civitai Tab -->
+            <div class="tab-pane fade show active" id="civitai" role="tabpanel">
+                {% if has_access(session.user_tier, 'enterprise') %}
+                <div class="form-group mt-3">
+                    <label for="civitaiSearch">Search Civitai Models:</label>
+                    <input type="text" id="civitaiSearch" class="form-control" placeholder="e.g., cartoon style">
+                    <button id="search-civitai" class="btn btn-info mt-2 w-100">Search</button>
+                    <div id="civitai-results" class="mt-2" style="max-height: 150px; overflow-y: auto;"></div>
+                </div>
+                <div class="form-group">
+                    <input type="hidden" id="civitai-model-version-id">
+                    <label for="civitaiPrompt">Prompt:</label>
+                    <input type="text" id="civitaiPrompt" class="form-control" placeholder="Your detailed prompt">
+                </div>
+                <button id="generate-civitai-image" class="btn btn-primary w-100">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+                    Generate with Civitai
+                </button>
+                {% else %}
+                <div class="alert alert-warning mt-3">
+                    This is an Enterprise feature. <a href="{{ url_for('upgrade') }}">Upgrade your plan</a> to use custom Civitai models.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        <hr>
+        <div class="form-group">
+            <label for="textInput">Text:</label>
+            <input type="text" id="textInput" class="form-control">
+            <button id="addText" class="btn btn-secondary mt-2">Add Text</button>
+        </div>
+        <div class="form-group">
+            <label for="imageUpload">Upload Image:</label>
+            <input type="file" id="imageUpload" class="form-control-file">
+        </div>
+        <button id="clearCanvas" class="btn btn-danger">Clear Canvas</button>
+        <a id="download-link" class="btn btn-info mt-3" href="#">Download Design</a>
+    </div>
+</div>
+
+<button id="save-design" class="btn btn-primary mt-3">Save Design</button>
+<button id="checkout-button" class="btn btn-success mt-3" style="display: none;">Mint NFT ($10)</button>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    // ... (Existing canvas and checkout logic remains the same)
+
+    const civitaiSearchInput = document.getElementById('civitaiSearch');
+    const searchCivitaiButton = document.getElementById('search-civitai');
+    const civitaiResults = document.getElementById('civitai-results');
+    const civitaiModelVersionId = document.getElementById('civitai-model-version-id');
+    const civitaiPrompt = document.getElementById('civitaiPrompt');
+    const generateCivitaiButton = document.getElementById('generate-civitai-image');
+
+    // Civitai Search
+    searchCivitaiButton.addEventListener('click', () => {
+        const query = civitaiSearchInput.value;
+        if (!query) return;
+
+        fetch("/api/civitai/search", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ query: query })
+        })
+        .then(response => response.json())
+        .then(data => {
+            civitaiResults.innerHTML = '';
+            data.forEach(model => {
+                const modelDiv = document.createElement('div');
+                modelDiv.className = 'p-2 border-bottom';
+                modelDiv.style.cursor = 'pointer';
+                modelDiv.textContent = model.name;
+                modelDiv.onclick = () => {
+                    civitaiSearchInput.value = model.name;
+                    // Assuming the first version is the one we want to use
+                    if (model.modelVersions && model.modelVersions.length > 0) {
+                        civitaiModelVersionId.value = model.modelVersions[0].id;
+                    }
+                    civitaiResults.innerHTML = '';
+                };
+                civitaiResults.appendChild(modelDiv);
+            });
+        });
+    });
+    
+    // Civitai Generation
+    generateCivitaiButton.addEventListener('click', () => {
+        const modelVersionId = civitaiModelVersionId.value;
+        const prompt = civitaiPrompt.value;
+        if (!modelVersionId || !prompt) {
+            alert("Please select a model and enter a prompt.");
+            return;
+        }
+        
+        const spinner = generateCivitaiButton.querySelector('.spinner-border');
+        spinner.style.display = 'inline-block';
+        generateCivitaiButton.disabled = true;
+
+        fetch("/api/design/generate-image", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ model_version: modelVersionId, prompt: prompt })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert("Error: " + data.error);
+                return;
+            }
+
+            const img = new Image();
+            img.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            };
+            img.src = data.output[0];
+        })
+        .catch(error => alert("Error: " + error.message))
+        .finally(() => {
+            spinner.style.display = 'none';
+            generateCivitaiButton.disabled = false;
+        });
+    });
+
+</script>
+{% endblock %}

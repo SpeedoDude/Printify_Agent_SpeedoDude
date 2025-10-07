@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}AI Ad Generator{% endblock %}
+
+{% block content %}
+<h1>AI-Powered Ad Copy Generator</h1>
+<p>Generate compelling ad copy for your products on different platforms.</p>
+
+<div class="form-group">
+    <label for="productId">Enter Printify Product ID:</label>
+    <input type="text" class="form-control" id="productId" placeholder="e.g., 65a8a5b5b37603be04022acb">
+</div>
+
+<div class="form-group">
+    <label for="platform">Select Ad Platform:</label>
+    <select class="form-control" id="platform">
+        <option>Facebook</option>
+        <option>Instagram</option>
+        <option>Google Ads</option>
+        <option>TikTok</option>
+    </select>
+</div>
+
+<button class="btn btn-primary" id="generateAd">Generate Ad Copy</button>
+
+<div id="results" class="mt-4" style="display: none;">
+    <h2>Generated Ad Copy for <span id="platformName"></span></h2>
+    <div class="card">
+        <div class="card-header" id="adHeadline"></div>
+        <div class="card-body">
+            <p class="card-text" id="adBody"></p>
+            <a href="#" class="btn btn-primary" id="adCta"></a>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById("generateAd").addEventListener("click", () => {
+    const productId = document.getElementById("productId").value;
+    const platform = document.getElementById("platform").value;
+    if (!productId) {
+        alert("Please enter a Product ID.");
+        return;
+    }
+
+    fetch("/api/ad/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ product_id: productId, platform: platform })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert("Error: " + data.error);
+            return;
+        }
+
+        document.getElementById("platformName").textContent = platform;
+        document.getElementById("adHeadline").textContent = data.headline;
+        document.getElementById("adBody").textContent = data.body;
+        document.getElementById("adCta").textContent = data.cta;
+        document.getElementById("results").style.display = "block";
+    });
+});
+</script>
+{% endblock %}

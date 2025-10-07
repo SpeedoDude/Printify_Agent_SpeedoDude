@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.title }}{% endblock %}
+
+{% block content %}
+<h1>{{ product.title }}</h1>
+<div class="row">
+    <div class="col-md-6">
+        <img src="{{ product.images[0].src }}" alt="{{ product.title }}" class="img-fluid">
+    </div>
+    <div class="col-md-6">
+        <p>{{ product.description|safe }}</p>
+        <h2>Variants</h2>
+        <ul class="list-group">
+            {% for variant in product.variants %}
+            <li class="list-group-item">
+                {{ variant.title }} - ${{ variant.price / 100 }}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<hr>
+
+<h2>Product Reviews</h2>
+{% for review in reviews %}
+<div class="card mt-3">
+    <div class="card-body">
+        <h5 class="card-title">{{ review.username }}</h5>
+        <h6 class="card-subtitle mb-2 text-muted">Rating: {{ review.rating }}/5</h6>
+        <p class="card-text">{{ review.review }}</p>
+    </div>
+</div>
+{% endfor %}
+
+<h3 class="mt-4">Leave a Review</h3>
+<form method="POST" action="/products/{{ product.id }}/reviews">
+    <div class="form-group">
+        <label for="rating">Rating</label>
+        <select class="form-control" id="rating" name="rating">
+            <option>5</option>
+            <option>4</option>
+            <option>3</option>
+            <option>2</option>
+            <option>1</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="review">Review</label>
+        <textarea class="form-control" id="review" name="review" rows="3"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit Review</button>
+</form>
+{% endblock %}

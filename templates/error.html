@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block title %}Oops! Something went wrong.{% endblock %}
+
+{% block content %}
+<h1>Oops! Something went wrong.</h1>
+<p>We're sorry, but an unexpected error occurred. We've been notified and will look into it.</p>
+<p><em>{{ error }}</em></p>
+<a href="/" class="btn btn-primary">Go to Dashboard</a>
+{% endblock %}

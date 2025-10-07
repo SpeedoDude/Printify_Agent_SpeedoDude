@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Robo Script Automator{% endblock %}
+
+{% block content %}
+<h1>Robo Script Automator</h1>
+<p>Automate UI testing and other repetitive tasks by generating and executing Robo scripts.</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <h2>Action Recorder</h2>
+        <div id="screen" style="width: 300px; height: 500px; border: 1px solid black; position: relative;">
+            <div id="button" style="position: absolute; top: 100px; left: 100px; width: 100px; height: 50px; background-color: lightblue;">Click Me</div>
+        </div>
+        <div id="actions" class="mt-3"></div>
+    </div>
+    <div class="col-md-6">
+        <h2>Generated Script</h2>
+        <textarea id="script" class="form-control" rows="10"></textarea>
+        <button id="execute-script" class="btn btn-success mt-2">Execute Script</button>
+        <div id="output" class="mt-3"></div>
+    </div>
+</div>
+
+<script>
+    const screen = document.getElementById('screen');
+    const button = document.getElementById('button');
+    const actions = document.getElementById('actions');
+    const script = document.getElementById('script');
+    const executeScriptButton = document.getElementById('execute-script');
+    const output = document.getElementById('output');
+
+    let recordedActions = [];
+
+    screen.addEventListener('click', (e) => {
+        if (e.target === button) {
+            recordedActions.push({ type: 'click', x: e.offsetX, y: e.offsetY });
+            updateActions();
+        }
+    });
+    
+    function updateActions() {
+        actions.innerHTML = '';
+        recordedActions.forEach(action => {
+            const div = document.createElement('div');
+            div.textContent = `${action.type} at (${action.x}, ${action.y})`;
+            actions.appendChild(div);
+        });
+
+        fetch("/api/robo/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ actions: recordedActions })
+        })
+        .then(response => response.json())
+        .then(data => {
+            script.value = data.script;
+        });
+    }
+
+    executeScriptButton.addEventListener('click', () => {
+        fetch("/api/robo/execute", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ script: script.value })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                output.innerHTML = `<div class="alert alert-success">${data.output}</div>`;
+            } else {
+                output.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+            }
+        });
+    });
+</script>
+{% endblock %}

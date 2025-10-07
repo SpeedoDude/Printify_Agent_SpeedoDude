@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Upgrade Your Plan{% endblock %}
+
+{% block content %}
+<h1>Upgrade Your Plan</h1>
+<div class="row">
+    {% for tier_id, tier in tiers.items() %}
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ tier.name }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">{{ tier.price }}</h6>
+                <ul class="list-unstyled">
+                    {% for feature in tier.features %}
+                    <li>{{ feature }}</li>
+                    {% endfor %}
+                </ul>
+                <a href="#" class="btn btn-primary">Upgrade to {{ tier.name }}</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

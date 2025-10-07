@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}NFT Minting{% endblock %}
+
+{% block content %}
+<h1>NFT Minting</h1>
+<p>Mint a unique NFT for your product on the blockchain.</p>
+
+<div class="form-group">
+    <label for="productId">Enter Printify Product ID:</label>
+    <input type="text" class="form-control" id="productId" placeholder="e.g., 65a8a5b5b37603be04022acb">
+</div>
+
+<div class="form-group">
+    <label for="ownerAddress">Owner's Wallet Address:</label>
+    <input type="text" class="form-control" id="ownerAddress" placeholder="Enter the wallet address of the NFT owner">
+</div>
+
+<button class="btn btn-primary" id="mintButton">Mint NFT</button>
+
+<div id="results" class="mt-4" style="display: none;">
+    <h2>Minting Results</h2>
+    <div class="alert alert-success" role="alert">
+        <h4 class="alert-heading">Success!</h4>
+        <p id="successMessage"></p>
+        <hr>
+        <p class="mb-0"><strong>Transaction Hash:</strong> <span id="transactionHash"></span></p>
+        <p class="mb-0"><strong>Owner Address:</strong> <span id="ownerAddressResult"></span></p>
+    </div>
+</div>
+
+<script>
+document.getElementById("mintButton").addEventListener("click", () => {
+    const productId = document.getElementById("productId").value;
+    const ownerAddress = document.getElementById("ownerAddress").value;
+    if (!productId || !ownerAddress) {
+        alert("Please enter a Product ID and owner address.");
+        return;
+    }
+
+    fetch("/api/nft/mint", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ product_id: productId, owner_address: ownerAddress })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById("successMessage").textContent = data.message;
+            document.getElementById("transactionHash").textContent = data.transaction_hash;
+            document.getElementById("ownerAddressResult").textContent = data.owner_address;
+            document.getElementById("results").style.display = "block";
+        } else {
+            alert("Error: " + data.error);
+        }
+    });
+});
+</script>
+{% endblock %}

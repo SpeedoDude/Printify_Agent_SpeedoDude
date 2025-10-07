@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Publish to All Stores{% endblock %}
+
+{% block content %}
+<h1>Publish to All Stores</h1>
+<p>Select a product to publish to all of your Printify stores.</p>
+
+<div class="form-group">
+    <label for="productSelect">Select a Product:</label>
+    <select class="form-control" id="productSelect">
+        {% for product in products %}
+            <option value="{{ product.id }}">{{ product.title }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<button class="btn btn-primary" id="publishButton">Publish to All</button>
+
+<div id="results" class="mt-4" style="display: none;">
+    <h2>Publishing Results</h2>
+    <ul id="resultList" class="list-group"></ul>
+</div>
+
+<script>
+document.getElementById("publishButton").addEventListener("click", () => {
+    const productId = document.getElementById("productSelect").value;
+    if (!productId) {
+        alert("Please select a product.");
+        return;
+    }
+
+    fetch("/api/publish-to-all", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ product_id: productId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        const resultList = document.getElementById("resultList");
+        resultList.innerHTML = "";
+        data.forEach(item => {
+            const li = document.createElement("li");
+            li.className = `list-group-item ${item.result ? 'list-group-item-success' : 'list-group-item-danger'}`;
+            li.textContent = `Shop ${item.shop_id}: ${item.result ? 'Successfully published' : 'Failed to publish'}`;
+            resultList.appendChild(li);
+        });
+        document.getElementById("results").style.display = "block";
+    });
+});
+</script>
+{% endblock %}

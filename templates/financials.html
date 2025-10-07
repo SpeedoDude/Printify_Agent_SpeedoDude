@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Financial Analysis{% endblock %}
+
+{% block content %}
+<h1>Financial Analysis</h1>
+<p>An overview of your store's financial performance.</p>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Total Revenue</h5>
+                <p class="card-text" id="totalRevenue">$0.00</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Total Orders</h5>
+                <p class="card-text" id="totalOrders">0</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Average Order Value</h5>
+                <p class="card-text" id="avgOrderValue">$0.00</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4">
+    <canvas id="revenueChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    fetch("/api/financials/summary")
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("totalRevenue").textContent = `$${data.total_revenue.toFixed(2)}`;
+            document.getElementById("totalOrders").textContent = data.total_orders;
+            document.getElementById("avgOrderValue").textContent = `$${data.average_order_value.toFixed(2)}`;
+        });
+    
+    // In a real application, you would fetch time-series data for the chart.
+    // For this example, we'll use static data.
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    const revenueChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+            datasets: [{
+                label: 'Revenue',
+                data: [1200, 1900, 3000, 5000, 2300, 3100, 4000],
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

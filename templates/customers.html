@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Customer Management{% endblock %}
+
+{% block content %}
+<h1>Customer Management</h1>
+<p>A list of your customers and their order history.</p>
+
+<div class="table-responsive">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Order Count</th>
+                <th>Total Spent</th>
+            </tr>
+        </thead>
+        <tbody id="customerTable">
+        </tbody>
+    </table>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    fetch("/api/customers")
+        .then(response => response.json())
+        .then(data => {
+            const customerTable = document.getElementById("customerTable");
+            data.forEach(customer => {
+                const row = `<tr>
+                    <td>${customer.name}</td>
+                    <td>${customer.email}</td>
+                    <td>${customer.order_count}</td>
+                    <td>$${(customer.total_spent / 100).toFixed(2)}</td>
+                </tr>`;
+                customerTable.innerHTML += row;
+            });
+        });
+});
+</script>
+{% endblock %}

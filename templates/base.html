@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Printify Management System{% endblock %}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        .help-icon {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="/">Printify Manager</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item"><a class="nav-link" href="/">Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" href="/products">Products</a></li>
+                <li class="nav-item"><a class="nav-link" href="/orders">Orders</a></li>
+                <li class="nav-item"><a class="nav-link" href="/seo">SEO Optimizer</a></li>
+                <li class="nav-item"><a class="nav-link" href="/bulk/create">Bulk Creator</a></li>
+                <li class="nav-item"><a class="nav-link" href="/bulk/update">Bulk Updater</a></li>
+                <li class="nav-item"><a class="nav-link" href="/inventory">Inventory</a></li>
+                <li class="nav-item"><a class="nav-link" href="/catalog">Catalog Explorer</a></li>
+                <li class="nav-item"><a class="nav-link" href="/financials">Financials</a></li>
+                <li class="nav-item"><a class="nav-link" href="/customers">Customers</a></li>
+                <li class="nav-item"><a class="nav-link" href="/marketing">Marketing</a></li>
+                <li class="nav-item"><a class="nav-link" href="/ad-generator">Ad Generator</a></li>
+                <li class="nav-item"><a class="nav-link" href="/publish-to-all">Publish to All</a></li>
+                <li class="nav-item"><a class="nav-link" href="/community">Community</a></li>
+                <li class="nav-item"><a class="nav-link" href="/design-studio">Design Studio</a></li>
+                <li class="nav-item"><a class="nav-link" href="/nft-minting">NFT Minting</a></li>
+                <li class="nav-item"><a class="nav-link" href="/legal-dashboard">Legal</a></li>
+                <li class="nav-item"><a class="nav-link" href="/robo-script-automator">Robo Automator</a></li>
+                <li class="nav-item"><a class="nav-link" href="/settings">Settings</a></li>
+            </ul>
+            <ul class="navbar-nav">
+                {% if 'username' in session %}
+                    <li class="nav-item"><a class="nav-link" href="/setup-2fa">Setup 2FA</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/upgrade">Upgrade</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/logout">Logout</a></li>
+                {% else %}
+                    <li class="nav-item"><a class="nav-link" href="/login">Login</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+    <div class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </div>
+    <div class="help-icon" data-toggle="modal" data-target="#helpModal">
+        <i class="fas fa-question-circle"></i>
+    </div>
+
+    <!-- Help Modal -->
+    <div class="modal fade" id="helpModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Help</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="help-content">This is a help message.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

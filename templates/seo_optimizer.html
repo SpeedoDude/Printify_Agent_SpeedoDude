@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}AI-Powered SEO Agent{% endblock %}
+
+{% block content %}
+<h1>AI-Powered SEO Agent</h1>
+<div class="form-group">
+    <label for="productId">Enter Printify Product ID:</label>
+    <input type="text" class="form-control" id="productId" placeholder="e.g., 65a8a5b5b37603be04022acb">
+</div>
+<button class="btn btn-primary" id="generateSeo">Generate SEO Suggestions</button>
+
+<div id="results" class="mt-4" style="display: none;">
+    <h2>SEO Suggestions</h2>
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Original</h3>
+            <p><strong>Title:</strong> <span id="originalTitle"></span></p>
+            <p><strong>Description:</strong></p>
+            <div id="originalDescription"></div>
+        </div>
+        <div class="col-md-6">
+            <h3>New Suggestions</h3>
+            <form id="updateForm">
+                <input type="hidden" id="newProductId">
+                <div class="form-group">
+                    <label for="newTitle">Title</label>
+                    <input type="text" class="form-control" id="newTitle">
+                </div>
+                <div class="form-group">
+                    <label for="newDescription">Description</label>
+                    <textarea class="form-control" id="newDescription" rows="10"></textarea>
+                </div>
+                <button type="submit" class="btn btn-success">Update Product</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById("generateSeo").addEventListener("click", () => {
+    const productId = document.getElementById("productId").value;
+    if (!productId) {
+        alert("Please enter a Product ID.");
+        return;
+    }
+
+    fetch("/api/seo/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ product_id: productId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert("Error: " + data.error);
+            return;
+        }
+
+        document.getElementById("originalTitle").textContent = data.original_title;
+        document.getElementById("originalDescription").innerHTML = data.original_description;
+        document.getElementById("newTitle").value = data.new_title;
+        document.getElementById("newDescription").value = data.new_description;
+        document.getElementById("newProductId").value = productId;
+        document.getElementById("results").style.display = "block";
+    });
+});
+
+document.getElementById("updateForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const productId = document.getElementById("newProductId").value;
+    const title = document.getElementById("newTitle").value;
+    const description = document.getElementById("newDescription").value;
+
+    fetch("/api/seo/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ product_id: productId, title: title, description: description })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("Product updated successfully!");
+        } else {
+            alert("Error updating product: " + data.message);
+        }
+    });
+});
+</script>
+{% endblock %}
