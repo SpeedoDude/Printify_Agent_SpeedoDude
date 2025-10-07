@@ -1,6 +1,6 @@
 # seo_agent.py
 import json
-from api_clients import PrintifyApiClient, GeminiApiClient # Assuming GeminiApiClient can handle images
+from api_clients import PrintifyApiClient, GeminiApiClient
 
 def generate_seo_content_from_image(gemini_client, product_title, image_url):
     """
@@ -19,44 +19,33 @@ def generate_seo_content_from_image(gemini_client, product_title, image_url):
     The JSON object must have two keys: "new_title" (string) and "new_description" (string).
     """
     
-    # NOTE: This assumes your GeminiApiClient is updated to handle multimodal input.
-    # The actual method might differ based on the library you are using.
     generated_text = gemini_client.generate_content_with_image(prompt, image_url)
     return generated_text
 
-
 def run_seo_optimizer(product_id: str):
     """
-    Fetches a product and its image, generates new SEO content with AI, and updates it.
+    Fetches a product and its image, then generates new SEO content with AI.
+    Returns a dictionary with original and new content, or an error message.
     """
-    print(f"🤖 SEO Optimizer Agent: Initializing for product {product_id}...")
     printify_client = PrintifyApiClient()
     gemini_client = GeminiApiClient()
 
     # 1. Fetch the product from Printify
-    print("   - Fetching product data from Printify...")
     product = printify_client.get_product(product_id)
     if not product:
-        print(f"❌ Could not retrieve product with ID: {product_id}")
-        return
+        return {"error": f"Could not retrieve product with ID: {product_id}"}
 
     original_title = product.get("title", "")
+    original_description = product.get("description", "")
     
-    # --- NEW: Extract the main image URL ---
     try:
         image_url = product["images"][0]["src"]
-        print(f"   - Found product: '{original_title}'")
-        print(f"   - Found image URL: {image_url}")
     except (IndexError, KeyError):
-        print(f"❌ Product '{original_title}' has no images. Aborting.")
-        return
-    # --- END NEW ---
+        return {"error": f"Product '{original_title}' has no images. Aborting."}
 
     # 2. Generate new content with Gemini using the image
-    print("   - Asking Gemini AI to analyze the product image...")
     ai_response_text = generate_seo_content_from_image(gemini_client, original_title, image_url)
-    # ... (the rest of the function for parsing JSON and updating Printify remains the same)
-
+    
     # 3. Parse the AI-generated JSON response
     try:
         if "```json" in ai_response_text:
@@ -65,22 +54,29 @@ def run_seo_optimizer(product_id: str):
         data = json.loads(ai_response_text)
         new_title = data["new_title"]
         new_description = data["new_description"]
-        print(f"   - AI Generated Title: '{new_title}'")
     except (json.JSONDecodeError, KeyError) as e:
-        print(f"❌ Failed to parse the AI JSON response. Error: {e}")
-        print(f"   - Raw Response From AI: {ai_response_text}")
-        return
+        return {"error": f"Failed to parse the AI JSON response. Error: {e}", "raw_response": ai_response_text}
 
-    # 4. Update the product on Printify
+    return {
+        "original_title": original_title,
+        "original_description": original_description,
+        "image_url": image_url,
+        "new_title": new_title,
+        "new_description": new_description
+    }
+
+def update_product_seo(product_id: str, new_title: str, new_description: str):
+    """
+    Updates the product's title and description on Printify.
+    """
+    printify_client = PrintifyApiClient()
     update_payload = {
         "title": new_title,
         "description": new_description
     }
     
-    print("   - Sending updated data back to Printify...")
     response = printify_client.update_product(product_id, update_payload)
     if response:
-        print("✅ Success! Product SEO has been updated based on its design.")
+        return {"success": True, "message": "Product SEO has been updated successfully."}
     else:
-        print("❌ Failure. Could not update the product on Printify.")
-
+        return {"success": False, "message": "Failed to update the product on Printify."}
