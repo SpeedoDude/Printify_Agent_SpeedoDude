@@ -18,6 +18,28 @@ import os
 import subprocess
 from bi_agent import generate_bigquery_query, run_bigquery_query
 from social_media_agent import SocialMediaAgent
+from inventory_sync import InventorySync
+from personalization import PriceOptimization
+from seo_agent import SEOAgent
+from order_reporter import ReportingAgent
+from ad_agent import AdAgent
+from ab_testing import ABTestingAgent
+from threat_intelligence import ThreatIntelligenceAgent
+from loyalty_program import LoyaltyProgram
+from order_fulfiller import OrderFulfillmentAgent
+from supply_chain import SupplyChainAgent
+from predictive_analytics import PredictiveAnalyticsAgent
+from content_creation import ContentCreationAgent
+from ip_protection import IPProtectionAgent
+from email_marketing import EmailMarketingAgent
+from google_sheets import GoogleSheetsAgent
+from competitor_analysis import CompetitorAnalysisAgent
+from customer_segmentation import CustomerSegmentationAgent
+from financial_management import FinancialManagementAgent
+from hr_payroll import HRPayrollAgent
+from advanced_crm import AdvancedCRMAgent
+from project_management import ProjectManagementAgent
+from legal_tech import LegalTechAgent
 
 # ... (imports from previous step)
 
@@ -30,11 +52,34 @@ app.config['UPLOAD_FOLDER'] = 'uploads'
 user_db = UserDB()
 reviews_db = ProductReviews()
 contests_db = Contests()
-referrals_db = Referrals()
+referrals_db = Referrals
 activity_db = UserActivity()
 personalization_engine = Personalization()
 civitai_client = CivitaiClient()
 social_media_agent = SocialMediaAgent()
+inventory_sync_agent = InventorySync()
+price_optimization_agent = PriceOptimization()
+seo_agent = SEOAgent()
+reporting_agent = ReportingAgent()
+ad_agent = AdAgent()
+ab_testing_agent = ABTestingAgent()
+threat_intelligence_agent = ThreatIntelligenceAgent()
+loyalty_program_agent = LoyaltyProgram()
+order_fulfillment_agent = OrderFulfillmentAgent()
+supply_chain_agent = SupplyChainAgent()
+predictive_analytics_agent = PredictiveAnalyticsAgent()
+content_creation_agent = ContentCreationAgent()
+ip_protection_agent = IPProtectionAgent()
+email_marketing_agent = EmailMarketingAgent()
+google_sheets_agent = GoogleSheetsAgent()
+competitor_analysis_agent = CompetitorAnalysisAgent()
+customer_segmentation_agent = CustomerSegmentationAgent()
+financial_management_agent = FinancialManagementAgent()
+hr_payroll_agent = HRPayrollAgent()
+advanced_crm_agent = AdvancedCRMAgent()
+project_management_agent = ProjectManagementAgent()
+legal_tech_agent = LegalTechAgent()
+
 
 def login_required(f):
     @wraps(f)
@@ -289,6 +334,118 @@ def api_legal_generate_disclaimer():
 
     disclaimer = generate_legal_disclaimer(product_type)
     return jsonify({"disclaimer": disclaimer})
+
+@app.route('/run-financial-management', methods=['POST'])
+@login_required
+def run_financial_management():
+    financial_task = request.form.get('financial_task')
+    try:
+        if financial_task == 'bookkeeping':
+            result = financial_management_agent.run_bookkeeping()
+        elif financial_task == 'tax_compliance':
+            result = financial_management_agent.check_tax_compliance()
+        elif financial_task == 'financial_forecasting':
+            result = financial_management_agent.generate_financial_forecast()
+        else:
+            result = {'status': 'error', 'message': 'Invalid financial task selected.'}
+
+        if result['status'] == 'success':
+            flash(result['message'], 'success')
+        else:
+            flash(result['message'], 'danger')
+    except Exception as e:
+        flash(f"An error occurred: {e}", 'danger')
+    return redirect(url_for('dashboard'))
+
+@app.route('/run-hr-payroll', methods=['POST'])
+@login_required
+def run_hr_payroll():
+    hr_task = request.form.get('hr_task')
+    try:
+        if hr_task == 'payroll':
+            result = hr_payroll_agent.process_payroll()
+        elif hr_task == 'onboarding':
+            result = hr_payroll_agent.automate_onboarding()
+        elif hr_task == 'benefits_management':
+            result = hr_payroll_agent.manage_benefits()
+        else:
+            result = {'status': 'error', 'message': 'Invalid HR task selected.'}
+
+        if result['status'] == 'success':
+            flash(result['message'], 'success')
+        else:
+            flash(result['message'], 'danger')
+    except Exception as e:
+        flash(f"An error occurred: {e}", 'danger')
+    return redirect(url_for('dashboard'))
+
+@app.route('/run-advanced-crm', methods=['POST'])
+@login_required
+def run_advanced_crm():
+    crm_task = request.form.get('crm_task')
+    try:
+        if crm_task == 'lead_scoring':
+            result = advanced_crm_agent.run_lead_scoring()
+        elif crm_task == 'churn_prediction':
+            result = advanced_crm_agent.predict_churn()
+        elif crm_task == 'sentiment_analysis':
+            result = advanced_crm_agent.analyze_sentiment()
+        else:
+            result = {'status': 'error', 'message': 'Invalid CRM task selected.'}
+
+        if result['status'] == 'success':
+            flash(result['message'], 'success')
+        else:
+            flash(result['message'], 'danger')
+    except Exception as e:
+        flash(f"An error occurred: {e}", 'danger')
+    return redirect(url_for('dashboard'))
+
+@app.route('/run-project-management', methods=['POST'])
+@login_required
+def run_project_management():
+    project_management_task = request.form.get('project_management_task')
+    try:
+        if project_management_task == 'task_assignment':
+            result = project_management_agent.assign_tasks()
+        elif project_management_task == 'progress_tracking':
+            result = project_management_agent.track_progress()
+        elif project_management_task == 'resource_allocation':
+            result = project_management_agent.allocate_resources()
+        else:
+            result = {'status': 'error', 'message': 'Invalid project management task selected.'}
+
+        if result['status'] == 'success':
+            flash(result['message'], 'success')
+        else:
+            flash(result['message'], 'danger')
+    except Exception as e:
+        flash(f"An error occurred: {e}", 'danger')
+    return redirect(url_for('dashboard'))
+
+@app.route('/run-legal-tech', methods=['POST'])
+@login_required
+def run_legal_tech():
+    legal_tech_task = request.form.get('legal_tech_task')
+    try:
+        if legal_tech_task == 'contract_generation':
+            result = legal_tech_agent.generate_contract()
+        elif legal_tech_task == 'ediscovery':
+            result = legal_tech_agent.run_ediscovery()
+        elif legal_tech_task == 'legal_research':
+            result = legal_tech_agent.conduct_legal_research()
+        else:
+            result = {'status': 'error', 'message': 'Invalid legal tech task selected.'}
+
+        if result['status'] == 'success':
+            flash(result['message'], 'success')
+        else:
+            flash(result['message'], 'danger')
+    except Exception as e:
+        flash(f"An error occurred: {e}", 'danger')
+    return redirect(url_for('dashboard'))
+
+
 
 # ... (rest of the routes)
 

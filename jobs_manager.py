@@ -1,51 +1,30 @@
-# jobs_manager.py
+import uuid
+from datetime import datetime
 
-import csv
-import os
-import json
+class JobsManager:
+    def __init__(self):
+        self.jobs = {}
 
-class FailedJobsManager:
-    def __init__(self, file_path="failed_creation_jobs.csv"):
-        self.file_path = file_path
-        # Define headers for the CSV file
-        self.fieldnames = [
-            'title', 'description', 'blueprint_id', 'print_provider_id',
-            'variants', 'print_areas', 'error'
-        ]
+    def add_job(self, target, args):
+        job_id = str(uuid.uuid4())
+        self.jobs[job_id] = {
+            "target": target,
+            "args": args,
+            "status": "pending",
+            "created_at": datetime.utcnow(),
+            "result": None
+        }
+        return job_id
 
-    def log_job(self, payload, error_message):
-        """Logs a failed product creation payload to the CSV."""
-        # Make a copy to avoid modifying the original dict
-        data_row = payload.copy()
-        data_row['error'] = str(error_message)
+    def get_job(self, job_id):
+        return self.jobs.get(job_id)
 
-        # Convert complex objects to JSON strings for CSV compatibility
-        data_row['variants'] = json.dumps(data_row.get('variants', []))
-        data_row['print_areas'] = json.dumps(data_row.get('print_areas', []))
+    def update_job_status(self, job_id, status, result=None):
+        if job_id in self.jobs:
+            self.jobs[job_id]["status"] = status
+            self.jobs[job_id]["result"] = result
 
-        file_exists = os.path.isfile(self.file_path)
-        try:
-            with open(self.file_path, mode='a', newline='', encoding='utf-8') as csvfile:
-                writer = csv.DictWriter(csvfile, fieldnames=self.fieldnames)
-                if not file_exists:
-                    writer.writeheader()
-                
-                # Write only the fields defined in fieldnames
-                writer.writerow({k: v for k, v in data_row.items() if k in self.fieldnames})
-        except Exception as e:
-            print(f"CRITICAL: Could not write to failed jobs log. Reason: {e}")
+    def get_failed_jobs(self):
+        return [job for job in self.jobs.values() if job['status'] == 'failed']
 
-    def get_jobs(self):
-        """Reads all failed jobs from the CSV."""
-        if not os.path.isfile(self.file_path):
-            return []
-        
-        with open(self.file_path, mode='r', encoding='utf-8') as csvfile:
-            reader = csv.DictReader(csvfile)
-            return list(reader)
-
-    def clear_log(self):
-        """Deletes the log file."""
-        if os.path.isfile(self.file_path):
-            os.remove(self.file_path)
-
+jobs_manager = JobsManager()

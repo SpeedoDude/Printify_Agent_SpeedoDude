@@ -9,7 +9,7 @@
         .container { max-width: 800px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         h1 { color: #333; }
         .agent-section { margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
-        input[type="file"] { margin-bottom: 10px; }
+        input[type="file"], input[type="text"], select, textarea { margin-bottom: 10px; width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
         input[type="submit"] { background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; }
         input[type="submit"]:hover { background-color: #0056b3; }
         .flash { padding: 10px; margin-bottom: 15px; border-radius: 4px; }
@@ -19,7 +19,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Printify Agent Dashboard</h1>
+        <h1>Printify AutoManager Dashboard</h1>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
@@ -30,15 +30,75 @@
         {% endwith %}
 
         <div class="agent-section">
-            <h2>Bulk Product Updater Agent</h2>
-            <p>Upload a CSV file to update product prices, margins, or titles.</p>
-            <form action="/run-bulk-update" method="post" enctype="multipart/form-data">
-                <label for="file">Choose CSV file:</label>
-                <input type="file" name="file" id="file" required>
-                <input type="submit" value="Run Update Agent">
+            <h2>Automated Financial Management Agent</h2>
+            <p>Handle bookkeeping, tax compliance, and financial forecasting.</p>
+            <form action="/run-financial-management" method="post">
+                <label for="financial_task">Select Task:</label>
+                <select name="financial_task" id="financial_task">
+                    <option value="bookkeeping">Automated Bookkeeping</option>
+                    <option value="tax_compliance">Tax Compliance Check</option>
+                    <option value="financial_forecasting">Financial Forecasting</option>
+                </select>
+                <input type="submit" value="Run Financial Agent">
             </form>
         </div>
 
+        <div class="agent-section">
+            <h2>HR & Payroll Automation Agent</h2>
+            <p>Automate payroll, employee onboarding, and other HR tasks.</p>
+            <form action="/run-hr-payroll" method="post">
+                <label for="hr_task">Select HR Task:</label>
+                <select name="hr_task" id="hr_task">
+                    <option value="payroll">Process Payroll</option>
+                    <option value="onboarding">Automate Onboarding</option>
+                    <option value="benefits_management">Manage Benefits</option>
+                </select>
+                <input type="submit" value="Run HR & Payroll Agent">
+            </form>
         </div>
+
+        <div class="agent-section">
+            <h2>Advanced CRM Agent</h2>
+            <p>Manage customer relationships with lead scoring, churn prediction, and sentiment analysis.</p>
+            <form action="/run-advanced-crm" method="post">
+                <label for="crm_task">Select CRM Task:</label>
+                <select name="crm_task" id="crm_task">
+                    <option value="lead_scoring">Lead Scoring</option>
+                    <option value="churn_prediction">Churn Prediction</option>
+                    <option value="sentiment_analysis">Customer Sentiment Analysis</option>
+                </select>
+                <input type="submit" value="Run Advanced CRM Agent">
+            </form>
+        </div>
+
+        <div class="agent-section">
+            <h2>Automated Project Management Agent</h2>
+            <p>Keep projects on track with automated task assignment and progress tracking.</p>
+            <form action="/run-project-management" method="post">
+                <label for="project_management_task">Select Task:</label>
+                <select name="project_management_task" id="project_management_task">
+                    <option value="task_assignment">Automated Task Assignment</option>
+                    <option value="progress_tracking">Progress Tracking</option>
+                    <option value="resource_allocation">Resource Allocation</option>
+                </select>
+                <input type="submit" value="Run Project Management Agent">
+            </form>
+        </div>
+
+        <div class="agent-section">
+            <h2>Legal Tech Automation Agent</h2>
+            <p>Automate contract generation, e-discovery, and legal research.</p>
+            <form action="/run-legal-tech" method="post">
+                <label for="legal_tech_task">Select Legal Tech Task:</label>
+                <select name="legal_tech_task" id="legal_tech_task">
+                    <option value="contract_generation">Contract Generation</option>
+                    <option value="ediscovery">E-Discovery</option>
+                    <option value="legal_research">Legal Research</option>
+                </select>
+                <input type="submit" value="Run Legal Tech Agent">
+            </form>
+        </div>
+
+    </div>
 </body>
 </html>
