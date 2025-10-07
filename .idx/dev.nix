@@ -12,6 +12,11 @@
     pkgs.python311Packages.flask
     pkgs.python311Packages.firebase-admin
     pkgs.python311Packages.google-cloud-bigquery
+    pkgs.python311Packages.requests
+    pkgs.python311Packages.python-dotenv
+    pkgs.python311Packages.gspread
+    pkgs.python311Packages.oauth2client
+    pkgs.python311Packages.sendgrid
     # pkgs.nodejs_20
     # pkgs.nodePackages.nodemon
   ];
