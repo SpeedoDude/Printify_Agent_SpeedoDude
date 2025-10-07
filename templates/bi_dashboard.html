@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6 text-gray-800">Business Intelligence Dashboard</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Placeholder for Top Selling Products -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700">Top Selling Products</h2>
+            <div id="top-products-chart"></div>
+        </div>
+
+        <!-- Placeholder for Sales Trends -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700">Sales Trends</h2>
+            <div id="sales-trends-chart"></div>
+        </div>
+
+        <!-- Placeholder for Sales by Status -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700">Sales by Status</h2>
+            <div id="sales-by-status-chart"></div>
+        </div>
+    </div>
+
+    <div class="mt-8">
+        <h2 class="text-2xl font-bold mb-4 text-gray-800">Ask a Question About Your Data</h2>
+        <form id="bi-query-form" class="flex items-center">
+            <input type="text" id="natural-language-query" class="w-full p-3 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., 'What were the total sales last month?'">
+            <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-r-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                Ask
+            </button>
+        </form>
+        <div id="query-results" class="mt-6"></div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Fetch and render charts
+        fetch('/bi-data')
+            .then(response => response.json())
+            .then(data => {
+                renderTopProductsChart(data.top_products);
+                renderSalesTrendsChart(data.sales_trends);
+                renderSalesByStatusChart(data.sales_by_status);
+            });
+
+        function renderTopProductsChart(products) {
+            const options = {
+                chart: {
+                    type: 'bar',
+                    height: 350
+                },
+                series: [{
+                    name: 'Sales',
+                    data: products.map(p => p.total_sales)
+                }],
+                xaxis: {
+                    categories: products.map(p => p.product_name)
+                },
+                title: {
+                    text: 'Top 5 Selling Products',
+                    align: 'left'
+                }
+            };
+
+            const chart = new ApexCharts(document.querySelector("#top-products-chart"), options);
+            chart.render();
+        }
+
+        function renderSalesTrendsChart(trends) {
+            const options = {
+                chart: {
+                    type: 'line',
+                    height: 350
+                },
+                series: [{
+                    name: 'Total Sales',
+                    data: trends.map(t => t.total_sales)
+                }],
+                xaxis: {
+                    categories: trends.map(t => t.date)
+                },
+                title: {
+                    text: 'Sales Trends (Last 30 Days)',
+                    align: 'left'
+                }
+            };
+
+            const chart = new ApexCharts(document.querySelector("#sales-trends-chart"), options);
+            chart.render();
+        }
+
+        function renderSalesByStatusChart(salesStatus) {
+            const options = {
+                chart: {
+                    type: 'pie',
+                    height: 350
+                },
+                series: salesStatus.map(s => s.count),
+                labels: salesStatus.map(s => s.status),
+                title: {
+                    text: 'Order Status Distribution',
+                    align: 'left'
+                },
+                responsive: [{
+                    breakpoint: 480,
+                    options: {
+                        chart: {
+                            width: 200
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }]
+            };
+
+            const chart = new ApexCharts(document.querySelector("#sales-by-status-chart"), options);
+            chart.render();
+        }
+
+        // Handle the natural language query form
+        const form = document.getElementById('bi-query-form');
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            const query = document.getElementById('natural-language-query').value;
+            fetch('/ask-bi', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ query: query })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultsContainer = document.getElementById('query-results');
+                if (data.error) {
+                    resultsContainer.innerHTML = `<div class="p-4 bg-red-100 text-red-700 rounded-md">${data.error}</div>`;
+                } else {
+                    let table = '<table class="min-w-full bg-white border rounded-md"><thead><tr>';
+                    Object.keys(data.results[0]).forEach(key => {
+                        table += `<th class="py-2 px-4 border-b">${key}</th>`;
+                    });
+                    table += '</tr></thead><tbody>';
+                    data.results.forEach(row => {
+                        table += '<tr>';
+                        Object.values(row).forEach(value => {
+                            table += `<td class="py-2 px-4 border-b text-center">${value}</td>`;
+                        });
+                        table += '</tr>';
+                    });
+                    table += '</tbody></table>';
+                    resultsContainer.innerHTML = table;
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

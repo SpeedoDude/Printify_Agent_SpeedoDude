@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6 text-gray-800">Marketing Dashboard</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Personalized Marketing Messages -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700">Generate Personalized Marketing Message</h2>
+            <form id="marketing-message-form">
+                <div class="mb-4">
+                    <label for="username" class="block text-gray-700 font-semibold mb-2">Enter Username</label>
+                    <input type="text" id="username" class="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., 'user1'" required>
+                </div>
+                <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    Generate Message
+                </button>
+            </form>
+            <div id="marketing-message-result" class="mt-6 p-4 bg-gray-100 rounded-md"></div>
+        </div>
+
+        <!-- Product Recommendations -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700">Get Product Recommendations</h2>
+            <form id="recommendations-form">
+                <div class="mb-4">
+                    <label for="rec-username" class="block text-gray-700 font-semibold mb-2">Enter Username</label>
+                    <input type="text" id="rec-username" class="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., 'user1'" required>
+                </div>
+                <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    Get Recommendations
+                </button>
+            </form>
+            <div id="recommendations-result" class="mt-6"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Handle personalized marketing message form
+        const marketingForm = document.getElementById('marketing-message-form');
+        marketingForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            fetch('/api/marketing/generate-message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username: username })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultContainer = document.getElementById('marketing-message-result');
+                if (data.error) {
+                    resultContainer.textContent = `Error: ${data.error}`;
+                } else {
+                    resultContainer.textContent = data.message;
+                }
+            });
+        });
+
+        // Handle product recommendations form
+        const recommendationsForm = document.getElementById('recommendations-form');
+        recommendationsForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            const username = document.getElementById('rec-username').value;
+            fetch('/api/recommendations', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username: username })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultContainer = document.getElementById('recommendations-result');
+                if (data.error) {
+                    resultContainer.innerHTML = `<p class="text-red-500">${data.error}</p>`;
+                } else {
+                    let productList = '<ul class="list-disc pl-5">';
+                    data.products.forEach(product => {
+                        productList += `<li class="text-gray-700">${product.name} (${product.category})</li>`;
+                    });
+                    productList += '</ul>';
+                    resultContainer.innerHTML = productList;
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

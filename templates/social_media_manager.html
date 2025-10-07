@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6 text-gray-800">Social Media Manager</h1>
+
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold mb-4 text-gray-700">Automate Your Social Media Marketing</h2>
+        <p class="text-gray-600 mb-6">
+            Automatically post your new products to your connected social media accounts. Our AI will generate compelling ad copy for each post.
+        </p>
+
+        <form id="social-media-form">
+            <div class="mb-4">
+                <label for="product-name" class="block text-gray-700 font-semibold mb-2">Product Name</label>
+                <input type="text" id="product-name" class="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., 'Awesome New T-Shirt'" required>
+            </div>
+
+            <div class="mb-4">
+                <label for="product-description" class="block text-gray-700 font-semibold mb-2">Product Description</label>
+                <textarea id="product-description" class="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" rows="4" placeholder="e.g., 'A high-quality, 100% cotton t-shirt with a unique design.'" required></textarea>
+            </div>
+
+            <div class="mb-6">
+                <label for="image-url" class="block text-gray-700 font-semibold mb-2">Image URL</label>
+                <input type="text" id="image-url" class="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="https://example.com/image.png" required>
+            </div>
+
+            <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                Post to Social Media
+            </button>
+        </form>
+
+        <div id="post-status" class="mt-6"></div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('social-media-form');
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            const productName = document.getElementById('product-name').value;
+            const productDescription = document.getElementById('product-description').value;
+            const imageUrl = document.getElementById('image-url').value;
+
+            fetch('/api/social-media/post', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    product_name: productName,
+                    product_description: productDescription,
+                    image_url: imageUrl
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const statusContainer = document.getElementById('post-status');
+                if (data.status === 'success') {
+                    statusContainer.innerHTML = `<div class="p-4 bg-green-100 text-green-700 rounded-md">${data.message}</div>`;
+                } else {
+                    statusContainer.innerHTML = `<div class="p-4 bg-red-100 text-red-700 rounded-md">Error: ${data.message}</div>`;
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
