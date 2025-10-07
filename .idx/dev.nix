@@ -2,25 +2,12 @@
 # see: https://firebase.google.com/docs/studio/customize-workspace
 { pkgs, ... }: {
   # Which nixpkgs channel to use.
-  channel = "stable-24.05"; # or "unstable"
-
+  channel = "stable-23.11"; # or "unstable"
   # Use https://search.nixos.org/packages to find packages
   packages = [
-    # pkgs.go
     pkgs.python311
     pkgs.python311Packages.pip
-    pkgs.python311Packages.flask
-    pkgs.python311Packages.firebase-admin
-    pkgs.python311Packages.google-cloud-bigquery
-    pkgs.python311Packages.requests
-    pkgs.python311Packages.python-dotenv
-    pkgs.python311Packages.gspread
-    pkgs.python311Packages.oauth2client
-    pkgs.python311Packages.sendgrid
-    # pkgs.nodejs_20
-    # pkgs.nodePackages.nodemon
   ];
-
   # Sets environment variables in the workspace
   env = {};
   idx = {
@@ -28,24 +15,29 @@
     extensions = [
       # "vscodevim.vim"
     ];
-
-    # Enable previews
+    # Enable previews and customize configuration
     previews = {
       enable = true;
-      previews = {
-        # web = {
-        #   # Example: run "npm run dev" with PORT set to IDX's defined port for previews,
-        #   # and show it in IDX's web preview panel
-        #   command = ["npm" "run" "dev"];
-        #   manager = "web";
-        #   env = {
-        #     # Environment variables to set for your server
-        #     PORT = "$PORT";
-        #   };
-        # };
-      };
+      previews = [{
+        # The first part of the command is the command to run.
+        # The second part is the directory to run the command in.
+        # The third part is the port to expose.
+        command = [
+          "pip",
+          "install",
+          "-r",
+          "requirements.txt",
+          "&&",
+          "python",
+          "app.py"
+        ];
+        manager = "web";
+        id = "web";
+        env = {
+          PORT = "$PORT";
+        };
+      }];
     };
-
     # Workspace lifecycle hooks
     workspace = {
       # Runs when a workspace is first created
