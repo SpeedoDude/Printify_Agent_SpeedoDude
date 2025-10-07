@@ -1,8 +1,3 @@
 Flask
 requests
 python-dotenv
-gspread
-oauth2client
-sendgrid
-firebase-admin
-google-cloud-bigquery
