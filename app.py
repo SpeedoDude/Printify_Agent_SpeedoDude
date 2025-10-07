@@ -40,6 +40,8 @@ from hr_payroll import HRPayrollAgent
 from advanced_crm import AdvancedCRMAgent
 from project_management import ProjectManagementAgent
 from legal_tech import LegalTechAgent
+from jobs_manager import jobs_manager
+import threading
 
 # ... (imports from previous step)
 
@@ -110,6 +112,13 @@ def log_feature_use(feature):
         return decorated_function
     return decorator
 
+def run_background_job(job_id, target, args):
+    try:
+        result = target(*args)
+        jobs_manager.update_job_status(job_id, 'completed', result)
+    except Exception as e:
+        jobs_manager.update_job_status(job_id, 'failed', str(e))
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -136,7 +145,7 @@ def logout():
 @log_feature_use('dashboard')
 def dashboard():
     recommendations = personalization_engine.get_recommendations(session['username'])
-    # ... (existing dashboard logic)
+    failed_jobs = jobs_manager.get_failed_jobs()
     return render_template("dashboard.html", recommendations=recommendations, failed_jobs=len(failed_jobs))
     
 @app.route("/design-studio")
@@ -339,110 +348,90 @@ def api_legal_generate_disclaimer():
 @login_required
 def run_financial_management():
     financial_task = request.form.get('financial_task')
-    try:
-        if financial_task == 'bookkeeping':
-            result = financial_management_agent.run_bookkeeping()
-        elif financial_task == 'tax_compliance':
-            result = financial_management_agent.check_tax_compliance()
-        elif financial_task == 'financial_forecasting':
-            result = financial_management_agent.generate_financial_forecast()
-        else:
-            result = {'status': 'error', 'message': 'Invalid financial task selected.'}
-
-        if result['status'] == 'success':
-            flash(result['message'], 'success')
-        else:
-            flash(result['message'], 'danger')
-    except Exception as e:
-        flash(f"An error occurred: {e}", 'danger')
+    target_map = {
+        'bookkeeping': financial_management_agent.run_bookkeeping,
+        'tax_compliance': financial_management_agent.check_tax_compliance,
+        'financial_forecasting': financial_management_agent.generate_financial_forecast,
+    }
+    target = target_map.get(financial_task)
+    if target:
+        job_id = jobs_manager.add_job(target, [])
+        threading.Thread(target=run_background_job, args=(job_id, target, [])).start()
+        flash(f'Financial management task "{financial_task}" has been started in the background.', 'success')
+    else:
+        flash('Invalid financial task selected.', 'danger')
     return redirect(url_for('dashboard'))
 
 @app.route('/run-hr-payroll', methods=['POST'])
 @login_required
 def run_hr_payroll():
     hr_task = request.form.get('hr_task')
-    try:
-        if hr_task == 'payroll':
-            result = hr_payroll_agent.process_payroll()
-        elif hr_task == 'onboarding':
-            result = hr_payroll_agent.automate_onboarding()
-        elif hr_task == 'benefits_management':
-            result = hr_payroll_agent.manage_benefits()
-        else:
-            result = {'status': 'error', 'message': 'Invalid HR task selected.'}
-
-        if result['status'] == 'success':
-            flash(result['message'], 'success')
-        else:
-            flash(result['message'], 'danger')
-    except Exception as e:
-        flash(f"An error occurred: {e}", 'danger')
+    target_map = {
+        'payroll': hr_payroll_agent.process_payroll,
+        'onboarding': hr_payroll_agent.automate_onboarding,
+        'benefits_management': hr_payroll_agent.manage_benefits,
+    }
+    target = target_map.get(hr_task)
+    if target:
+        job_id = jobs_manager.add_job(target, [])
+        threading.Thread(target=run_background_job, args=(job_id, target, [])).start()
+        flash(f'HR & Payroll task "{hr_task}" has been started in the background.', 'success')
+    else:
+        flash('Invalid HR task selected.', 'danger')
     return redirect(url_for('dashboard'))
 
 @app.route('/run-advanced-crm', methods=['POST'])
 @login_required
 def run_advanced_crm():
     crm_task = request.form.get('crm_task')
-    try:
-        if crm_task == 'lead_scoring':
-            result = advanced_crm_agent.run_lead_scoring()
-        elif crm_task == 'churn_prediction':
-            result = advanced_crm_agent.predict_churn()
-        elif crm_task == 'sentiment_analysis':
-            result = advanced_crm_agent.analyze_sentiment()
-        else:
-            result = {'status': 'error', 'message': 'Invalid CRM task selected.'}
-
-        if result['status'] == 'success':
-            flash(result['message'], 'success')
-        else:
-            flash(result['message'], 'danger')
-    except Exception as e:
-        flash(f"An error occurred: {e}", 'danger')
+    target_map = {
+        'lead_scoring': advanced_crm_agent.run_lead_scoring,
+        'churn_prediction': advanced_crm_agent.predict_churn,
+        'sentiment_analysis': advanced_crm_agent.analyze_sentiment,
+    }
+    target = target_map.get(crm_task)
+    if target:
+        job_id = jobs_manager.add_job(target, [])
+        threading.Thread(target=run_background_job, args=(job_id, target, [])).start()
+        flash(f'Advanced CRM task "{crm_task}" has been started in the background.', 'success')
+    else:
+        flash('Invalid CRM task selected.', 'danger')
     return redirect(url_for('dashboard'))
 
 @app.route('/run-project-management', methods=['POST'])
 @login_required
 def run_project_management():
     project_management_task = request.form.get('project_management_task')
-    try:
-        if project_management_task == 'task_assignment':
-            result = project_management_agent.assign_tasks()
-        elif project_management_task == 'progress_tracking':
-            result = project_management_agent.track_progress()
-        elif project_management_task == 'resource_allocation':
-            result = project_management_agent.allocate_resources()
-        else:
-            result = {'status': 'error', 'message': 'Invalid project management task selected.'}
-
-        if result['status'] == 'success':
-            flash(result['message'], 'success')
-        else:
-            flash(result['message'], 'danger')
-    except Exception as e:
-        flash(f"An error occurred: {e}", 'danger')
+    target_map = {
+        'task_assignment': project_management_agent.assign_tasks,
+        'progress_tracking': project_management_agent.track_progress,
+        'resource_allocation': project_management_agent.allocate_resources,
+    }
+    target = target_map.get(project_management_task)
+    if target:
+        job_id = jobs_manager.add_job(target, [])
+        threading.Thread(target=run_background_job, args=(job_id, target, [])).start()
+        flash(f'Project management task "{project_management_task}" has been started in the background.', 'success')
+    else:
+        flash('Invalid project management task selected.', 'danger')
     return redirect(url_for('dashboard'))
 
 @app.route('/run-legal-tech', methods=['POST'])
 @login_required
 def run_legal_tech():
     legal_tech_task = request.form.get('legal_tech_task')
-    try:
-        if legal_tech_task == 'contract_generation':
-            result = legal_tech_agent.generate_contract()
-        elif legal_tech_task == 'ediscovery':
-            result = legal_tech_agent.run_ediscovery()
-        elif legal_tech_task == 'legal_research':
-            result = legal_tech_agent.conduct_legal_research()
-        else:
-            result = {'status': 'error', 'message': 'Invalid legal tech task selected.'}
-
-        if result['status'] == 'success':
-            flash(result['message'], 'success')
-        else:
-            flash(result['message'], 'danger')
-    except Exception as e:
-        flash(f"An error occurred: {e}", 'danger')
+    target_map = {
+        'contract_generation': legal_tech_agent.generate_contract,
+        'ediscovery': legal_tech_agent.run_ediscovery,
+        'legal_research': legal_tech_agent.conduct_legal_research,
+    }
+    target = target_map.get(legal_tech_task)
+    if target:
+        job_id = jobs_manager.add_job(target, [])
+        threading.Thread(target=run_background_job, args=(job_id, target, [])).start()
+        flash(f'Legal tech task "{legal_tech_task}" has been started in the background.', 'success')
+    else:
+        flash('Invalid legal tech task selected.', 'danger')
     return redirect(url_for('dashboard'))
 
 
