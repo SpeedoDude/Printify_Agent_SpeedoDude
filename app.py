@@ -23,18 +23,7 @@ from personalization import PriceOptimization
 from seo_agent import SEOAgent
 from order_reporter import ReportingAgent
 from ad_agent import AdAgent
-from ab_testing import ABTestingAgent
-from threat_intelligence import ThreatIntelligenceAgent
-from loyalty_program import LoyaltyProgram
 from order_fulfiller import OrderFulfillmentAgent
-from supply_chain import SupplyChainAgent
-from predictive_analytics import PredictiveAnalyticsAgent
-from content_creation import ContentCreationAgent
-from ip_protection import IPProtectionAgent
-from email_marketing import EmailMarketingAgent
-from google_sheets import GoogleSheetsAgent
-from competitor_analysis import CompetitorAnalysisAgent
-from customer_segmentation import CustomerSegmentationAgent
 from financial_management import FinancialManagementAgent
 from hr_payroll import HRPayrollAgent
 from advanced_crm import AdvancedCRMAgent
@@ -64,18 +53,7 @@ price_optimization_agent = PriceOptimization()
 seo_agent = SEOAgent()
 reporting_agent = ReportingAgent()
 ad_agent = AdAgent()
-ab_testing_agent = ABTestingAgent()
-threat_intelligence_agent = ThreatIntelligenceAgent()
-loyalty_program_agent = LoyaltyProgram()
 order_fulfillment_agent = OrderFulfillmentAgent()
-supply_chain_agent = SupplyChainAgent()
-predictive_analytics_agent = PredictiveAnalyticsAgent()
-content_creation_agent = ContentCreationAgent()
-ip_protection_agent = IPProtectionAgent()
-email_marketing_agent = EmailMarketingAgent()
-google_sheets_agent = GoogleSheetsAgent()
-competitor_analysis_agent = CompetitorAnalysisAgent()
-customer_segmentation_agent = CustomerSegmentationAgent()
 financial_management_agent = FinancialManagementAgent()
 hr_payroll_agent = HRPayrollAgent()
 advanced_crm_agent = AdvancedCRMAgent()

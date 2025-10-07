@@ -1,4 +1,4 @@
-# Printify Automation Suite
+8# Printify Automation Suite
 
 This project is a suite of tools and agents designed to automate and manage a Printify store. It includes a powerful command-line interface (CLI) for batch operations and a user-friendly graphical user interface (GUI) for day-to-day tasks.
 
